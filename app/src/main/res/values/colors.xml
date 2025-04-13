@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">@color/cyan_600</color>
+    <color name="colorPrimaryDark">@color/cyan_800</color>
+    <color name="colorAccent">@color/cyan_400</color>
+    
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    
+    <!-- Cyan Colors -->
+    <color name="cyan_100">#B3E5FC</color>
+    <color name="cyan_200">#80D8FF</color>
+    <color name="cyan_300">#4DD0E1</color>
+    <color name="cyan_400">#22D3EE</color>
+    <color name="cyan_500">#06B6D4</color>
+    <color name="cyan_600">#0891B2</color>
+    <color name="cyan_700">#0E7490</color>
+    <color name="cyan_800">#155E75</color>
+    <color name="cyan_900">#164E63</color>
+    <color name="cyan_950">#083344</color>
+    
+    <!-- Red Colors -->
+    <color name="red_200">#FECACA</color>
+    <color name="red_300">#FCA5A5</color>
+    <color name="red_400">#F87171</color>
+    <color name="red_500">#EF4444</color>
+    <color name="red_600">#DC2626</color>
+    <color name="red_700">#B91C1C</color>
+    <color name="red_800">#991B1B</color>
+    <color name="red_900">#7F1D1D</color>
+    <color name="red_950">#450A0A</color>
+    
+    <!-- Amber Colors -->
+    <color name="amber_200">#FDE68A</color>
+    <color name="amber_300">#FCD34D</color>
+    <color name="amber_400">#FBBF24</color>
+    <color name="amber_500">#F59E0B</color>
+    <color name="amber_600">#D97706</color>
+    <color name="amber_700">#B45309</color>
+    <color name="amber_800">#92400E</color>
+    
+    <color name="amber_900">#78350F</color>
+    <color name="amber_950">#451A03</color>
+    
+    <!-- Gray Colors -->
+    <color name="gray_50">#F9FAFB</color>
+    <color name="gray_100">#F3F4F6</color>
+    <color name="gray_200">#E5E7EB</color>
+    <color name="gray_300">#D1D5DB</color>
+    <color name="gray_400">#9CA3AF</color>
+    <color name="gray_500">#6B7280</color>
+    <color name="gray_600">#4B5563</color>
+    <color name="gray_700">#374151</color>
+    <color name="gray_800">#1F2937</color>
+    <color name="gray_900">#111827</color>
+    <color name="gray_950">#030712</color>
+    
+    <!-- Green Colors -->
+    <color name="green_200">#BBF7D0</color>
+    <color name="green_300">#86EFAC</color>
+    <color name="green_400">#4ADE80</color>
+    <color name="green_500">#22C55E</color>
+    <color name="green_600">#16A34A</color>
+    <color name="green_700">#15803D</color>
+    <color name="green_800">#166534</color>
+    <color name="green_900">#14532D</color>
+    <color name="green_950">#052E16</color>
+</resources>
+

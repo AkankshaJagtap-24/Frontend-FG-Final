@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Flood Guard</string>
+    <string name="app_slogan">Stay Informed, Stay Safe</string>
+    
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    
+    <string name="title_home">Home</string>
+    <string name="title_alerts">Alerts</string>
+    <string name="title_weather">Weather</string>
+    <string name="title_forum">Forum</string>
+    <string name="title_profile">Profile</string>
+    
+    <string name="action_settings">Settings</string>
+    <string name="action_logout">Logout</string>
+</resources>
+

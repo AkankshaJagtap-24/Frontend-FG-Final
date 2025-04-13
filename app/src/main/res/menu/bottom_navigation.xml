@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/ic_home"
+        android:title="@string/title_home" />
+    <item
+        android:id="@+id/nav_alerts"
+        android:icon="@drawable/ic_bell"
+        android:title="@string/title_alerts" />
+    <item
+        android:id="@+id/nav_weather"
+        android:icon="@drawable/ic_cloud_rain"
+        android:title="@string/title_weather" />
+    <item
+        android:id="@+id/nav_forum"
+        android:icon="@drawable/ic_message_square"
+        android:title="@string/title_forum" />
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/ic_user"
+        android:title="@string/title_profile" />
+</menu>
+
