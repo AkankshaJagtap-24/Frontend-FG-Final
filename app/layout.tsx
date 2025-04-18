@@ -4,7 +4,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { UserProvider } from "@/contexts/user-context"
-
+import { AndroidLayout } from "@/components/android-layout"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
@@ -18,14 +18,14 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  return (
+  return ( 
     <html lang="en">
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <UserProvider>{children}</UserProvider>
         </ThemeProvider>
       </body>
-    </html>
+    </html> 
   )
 }
 

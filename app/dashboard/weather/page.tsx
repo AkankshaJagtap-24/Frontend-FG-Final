@@ -7,22 +7,109 @@ import { getCurrentLocation, getWeatherData } from "@/lib/location-service"
 import { AndroidLayout } from "@/components/android-layout"
 
 export default function WeatherPage() {
+  const [mounted, setMounted] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [weather, setWeather] = useState<any>(null)
   const [error, setError] = useState("")
 
+  // Handle client-side mounting
   useEffect(() => {
-    const loadWeather = async () => {
-      setIsLoading(true)
-      try {
-        const location = await getCurrentLocation()
+    setMounted(true)
+    return () => setMounted(false)
+  }, [])
 
-        if (location.error) {
-          setError(location.error)
+  useEffect(() => {
+    if (!mounted) return
+
+    const loadWeather = async () => {
+      try {
+        const token = sessionStorage.getItem('token')
+        if (!token) {
+          setError("Authentication required")
+          setIsLoading(false)
+          return
+        }
+        setIsLoading(true)
+        const userLocation = sessionStorage.getItem('userLocation') || 'mumbai'
+        
+        // Fetch weather data with retry logic
+        let retries = 3;
+        let response;
+        
+        while (retries > 0) {
+          try {
+            response = await fetch(`http://localhost:5001/api/weather-forecast`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                location: userLocation
+              })
+            });
+            break;
+          } catch (error) {
+            retries--;
+            if (retries === 0) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        }
+
+        if (!response || !response.ok) {
+          throw new Error('Network response was not ok')
+        }
+
+        const data = await response.json()
+        console.log(data)
+        // Fetch alerts simultaneously
+        // const alertsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/alerts`, {
+        //   headers: {
+        //     'Authorization': `Bearer ${token}`,
+        //   },
+        //   mode: 'cors'  ,
+        //   credentials: 'include'
+        // })
+
+        // const alertsData = await alertsResponse.json()
+
+        if (data.success) {
+          const currentWeather = data.data.forecast[0]
+          setWeather({
+            location: data.data.city,
+            // alerts: alertsData.alerts || [],
+            current: {
+              temp: Math.round(currentWeather.temperature),
+              feelsLike: Math.round(currentWeather.feels_like),
+              condition: currentWeather.weather.description,
+              humidity: currentWeather.humidity,
+              wind: Math.round(currentWeather.wind.speed),
+              rainfall: 0,
+              precipitation: currentWeather.humidity,
+              lastUpdated: new Date(currentWeather.datetime).toLocaleString()
+            },
+            daily: data.data.forecast.reduce((acc: any[], item: any) => {
+              const date = new Date(item.datetime).toLocaleDateString('en-US', { weekday: 'short' })
+              const existingDay = acc.find(d => d.day === date)
+              
+              if (!existingDay) {
+                acc.push({
+                  day: date,
+                  high: Math.round(item.temperature),
+                  low: Math.round(item.temperature),
+                  icon: item.weather.icon,
+                  precip: item.humidity,
+                  description: item.weather.description
+                })
+              } else {
+                existingDay.high = Math.max(existingDay.high, Math.round(item.temperature))
+                existingDay.low = Math.min(existingDay.low, Math.round(item.temperature))
+              }
+              return acc
+            }, []).slice(0, 5)
+          })
         } else {
-          // Get weather data based on location
-          const weatherData = getWeatherData(location)
-          setWeather(weatherData)
+          throw new Error(data.message || 'Failed to fetch weather data')
         }
       } catch (err) {
         console.error("Failed to load weather:", err)
@@ -33,7 +120,32 @@ export default function WeatherPage() {
     }
 
     loadWeather()
-  }, [])
+  }, [mounted])
+
+  // Prevent hydration mismatch by not rendering until mounted
+  if (!mounted) {
+    return (
+      <AndroidLayout>
+        <div className="flex flex-col min-h-[calc(100dvh-80px)] bg-gray-950 text-white">
+          <header className="p-4 flex items-center border-b border-cyan-900">
+            <Link href="/dashboard" className="mr-4">
+              <ArrowLeft className="w-6 h-6 text-cyan-400" />
+            </Link>
+            <div className="flex items-center">
+              <CloudRain className="w-6 h-6 text-cyan-400 mr-2" />
+              <h1 className="text-xl font-bold text-cyan-400">Weather</h1>
+            </div>
+          </header>
+          <main className="flex-1 p-4">
+            <div className="flex flex-col items-center justify-center h-40">
+              <Loader2 className="w-8 h-8 text-cyan-400 animate-spin mb-4" />
+              <p className="text-cyan-300">Loading...</p>
+            </div>
+          </main>
+        </div>
+      </AndroidLayout>
+    )
+  }
 
   return (
     <AndroidLayout>
@@ -66,9 +178,9 @@ export default function WeatherPage() {
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h2 className="text-lg font-medium text-cyan-400">Current Weather</h2>
-                      <p className="text-sm text-gray-300">Downtown Area</p>
+                      <p className="text-sm text-gray-300">{weather.location}</p>
                     </div>
-                    <p className="text-sm text-gray-300">Updated 10 min ago</p>
+                    <p className="text-sm text-gray-300">Updated {new Date(weather.current.lastUpdated).toLocaleTimeString()}</p>
                   </div>
 
                   <div className="flex items-center justify-between">
@@ -100,8 +212,8 @@ export default function WeatherPage() {
                 </CardContent>
               </Card>
 
-              <h3 className="text-lg font-medium text-cyan-400 mb-3">Hourly Forecast</h3>
-              <div className="overflow-x-auto pb-2">
+              {/* <h3 className="text-lg font-medium text-cyan-400 mb-3">Hourly Forecast</h3> */}
+              {/* <div className="overflow-x-auto pb-2">
                 <div className="flex space-x-3 min-w-max">
                   {weather.hourly.map((item: any, index: number) => (
                     <Card key={index} className="bg-gray-900 border-cyan-900 flex-shrink-0 w-20">
@@ -114,7 +226,7 @@ export default function WeatherPage() {
                     </Card>
                   ))}
                 </div>
-              </div>
+              </div> */}
 
               <h3 className="text-lg font-medium text-cyan-400 mt-4 mb-3">5-Day Forecast</h3>
               <Card className="bg-gray-900 border-cyan-900">
@@ -127,7 +239,14 @@ export default function WeatherPage() {
                       }`}
                     >
                       <p className="text-sm font-medium w-16 text-white">{item.day}</p>
-                      <CloudRain className="w-6 h-6 text-cyan-400" />
+                      <div className="flex flex-col items-center">
+                        <img 
+                          src={`http://openweathermap.org/img/wn/${item.icon}.png`}
+                          alt={item.description}
+                          className="w-8 h-8"
+                        />
+                        <p className="text-xs text-gray-400">{item.description}</p>
+                      </div>
                       <p className="text-xs text-cyan-400 w-12 text-center">{item.precip}%</p>
                       <div className="flex items-center space-x-2">
                         <p className="text-sm font-medium text-white">{item.high}°</p>

@@ -49,7 +49,9 @@ export default function LoginPage() {
         // Store data in session storage
         sessionStorage.setItem('token', data.token)
         sessionStorage.setItem('user', JSON.stringify(data.user))
-
+        sessionStorage.setItem('userLocation', data.user.city.toLowerCase())
+        sessionStorage.setItem('userState', data.user.state.toLowerCase())
+        sessionStorage.setItem('userPincode', data.user.pincode)
         // Update user context
         const success = await login(data.user.name, data.user.email)
 

@@ -48,42 +48,44 @@ export default function ForumPage() {
     }
 
     loadPosts()
-  }, [user?.token])
+  }, []) // Removed user?.token from dependencies since it's not used
 
   const handleCreatePost = async () => {
     if (!newPostTitle || !newPostContent) return
 
     setIsSubmitting(true)
+    const token = sessionStorage.getItem('token')
 
     try {
-      // In a real app, this would send the post to an API
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // Add new post to the list
-      const newPost = {
-        id: `post-${Date.now()}`,
-        author: {
-          name: user?.name || "Anonymous",
-          initials:
-            user?.name
-              .split(" ")
-              .map((n) => n[0])
-              .join("")
-              .toUpperCase() || "AN",
-          color: "cyan",
+      const response = await fetch('http://localhost:5001/api/add_forum_post', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer `+token, // Assuming you have a user object with a token property
+          'Content-Type': 'application/json'
         },
-        time: "Just now",
-        title: newPostTitle,
-        content: newPostContent,
-        likes: 0,
-        comments: 0,
-      }
+        body: JSON.stringify({
+          title: newPostTitle,
+          content: newPostContent
+        })
+      });
 
-      setPosts([newPost, ...posts])
-      setNewPostTitle("")
+      const data = await response.json();
+      
+      if (data.success) {
+        // Assuming the API returns the created post
+        setPosts([data.post, ...posts]);
+        setNewPostTitle("");
+        setNewPostContent("");
+        setNewPostOpen(false);
+      } else {
+        console.error("Failed to create post");
+      }
       setNewPostContent("")
       setNewPostOpen(false)
-    } catch (err) {
+ {
+      setIsSubmitting(false)
+    }
+  }catch (err) {
       console.error("Failed to create post:", err)
     } finally {
       setIsSubmitting(false)

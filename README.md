@@ -54,4 +54,14 @@ The app follows a modular architecture with:
 
 TO tun the app use 
 npm run dev command
-http://localhost:3000
+http://localhost:3000  Akanksha_project_flood-guard>
+    npm start  
+    - Local:        http://localhost:3000
+   - Network:      http://192.168.1.107:3000
+
+   Akanksha_project_flood-guard>
+    npm start  
+    - Local:        http://localhost:3000
+   - Network:      http://192.168.1.107:3000
+
+   

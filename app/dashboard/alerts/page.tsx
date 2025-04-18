@@ -12,30 +12,54 @@ export default function AlertsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [alerts, setAlerts] = useState<any[]>([])
   const [error, setError] = useState("")
+  const [token, setToken] = useState<string | null>(null);
 
-  useEffect(() => {
-    const loadAlerts = async () => {
-      setIsLoading(true)
-      try {
-        const location = await getCurrentLocation()
+    useEffect(() => {
+      setToken(sessionStorage.getItem('token'));
+    }, []);
 
-        if (location.error) {
-          setError(location.error)
-        } else {
-          // Get alerts based on location
-          const alertsData = getNearbyAlerts(location)
-          setAlerts(alertsData)
+    useEffect(() => {
+      if (!token) return; // Don't fetch if token is not available
+
+      const loadAlerts = async () => {
+        setIsLoading(true)
+        try {
+          const response = await fetch('http://localhost:5001/api/alerts', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          const data = await response.json();
+          console.log('API Response:', data); // Debug log
+          
+          if (response.ok && data.success) {
+            const alertsArray = data.data; // Access the data array from response
+            setAlerts(alertsArray.map((alert: any) => ({
+              id: alert.id,
+              title: alert.title,
+              description: alert.description,
+              severity: alert.severity,
+              location: alert.location,
+              // time: new Date(alert.expires_at).toLocaleString(),
+              createdBy: alert.created_by_name,
+              createdAt: new Date(alert.created_at).toLocaleString()
+            })));
+          } else {
+            setError(data.message || "Failed to fetch alerts");
+          }
+        } catch (err) {
+          console.error("Failed to load alerts:", err)
+          setError("Failed to load alerts. Please try again.")
+        } finally {
+          setIsLoading(false)
         }
-      } catch (err) {
-        console.error("Failed to load alerts:", err)
-        setError("Failed to load alerts. Please try again.")
-      } finally {
-        setIsLoading(false)
       }
-    }
 
-    loadAlerts()
-  }, [])
+      loadAlerts()
+    }, [token])
 
   return (
     <AndroidLayout>
@@ -106,7 +130,7 @@ export default function AlertsPage() {
                         >
                           {alert.title}
                         </p>
-                        <p className="text-xs text-gray-400">{alert.time}</p>
+                        {/* <p className="text-xs text-gray-400">{alert.time}</p> */}
                       </div>
                       <p
                         className={`text-xs mt-1 ${

@@ -32,17 +32,38 @@ export default function DashboardPage() {
       setIsLoading(true)
       try {
         const location = await getCurrentLocation()
+        const token = sessionStorage.getItem('token')
+        const userCity = sessionStorage.getItem('userLocation') || 'mumbai'
 
-        if (location.error) {
-          setLocationError(location.error)
-        } else {
-          // Get alerts and weather based on location
-          const alertsData = getNearbyAlerts(location)
-          const weatherData = getWeatherData(location)
-
-          setAlerts(alertsData)
-          setWeather(weatherData)
+        // Fetch weather data from API
+        const weatherResponse = await fetch(`http://localhost:5001/api/weather/${userCity}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (!weatherResponse.ok) {
+          throw new Error('Failed to fetch weather data');
         }
+
+        const weatherData = await weatherResponse.json();
+        
+        if (weatherData.success) {
+          setWeather({
+            current: {
+              temp: Math.round(weatherData.weather.temperature),
+              condition: weatherData.weather.description,
+              humidity: weatherData.weather.humidity,
+              wind: Math.round(weatherData.weather.windSpeed),
+              rainfall: 0, // Not provided in API
+              lastUpdated: new Date(weatherData.weather.timestamp).toLocaleString()
+            }
+          });
+        }
+
+        // Get alerts based on location
+        const alertsData = getNearbyAlerts(location)
+        setAlerts(alertsData)
       } catch (err) {
         console.error("Failed to load data:", err)
         setLocationError("Failed to get location data")
@@ -60,21 +81,26 @@ export default function DashboardPage() {
       // Get current location
       const location = await getCurrentLocation()
       
-      // Get JWT token from session storage
+      // Get JWT token and user data from session storage
       const token = sessionStorage.getItem('token')
       const user = JSON.parse(sessionStorage.getItem('user') || '{}')
-
+      // const userCity = sessionStorage.getItem('userLocation') || 'mumbai'
+      const userData = JSON.parse(sessionStorage.getItem('user') || '{}')
+      // or individual fields
+      const userCity = sessionStorage.getItem('userLocation')
+      const userState = sessionStorage.getItem('userState')
+      const userPincode = sessionStorage.getItem('userPincode')
       if (!token) {
         throw new Error('Authentication token not found')
       }
 
-      // Prepare the request body
+      // Prepare the request body with city from session
       const sosData = {
         userId: user.id,
-        location: "HOME",
+        location: userCity,
         log: location.longitude || "",
         lat: location.latitude || "",
-        city: location.city || "",
+        city: userCity,
         description: "Emergency SOS alert"
       }
 
@@ -237,11 +263,6 @@ export default function DashboardPage() {
 
           <Card className="bg-gray-900 border-cyan-900 mb-4">
             <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-medium text-cyan-400 flex items-center">
-                  <MapPin className="w-4 h-4 mr-1" /> Location Alerts
-                </h3>
-              </div>
               <div className="space-y-2">
                 {alerts.length > 0 ? (
                   alerts.map((alert, index) => (
@@ -297,6 +318,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
+          {/* Weather Card */}
           {weather && (
             <Card className="bg-gray-900 border-cyan-900">
               <CardContent className="p-4">
@@ -304,11 +326,14 @@ export default function DashboardPage() {
                   <h3 className="font-medium text-cyan-400 flex items-center">
                     <CloudRain className="w-4 h-4 mr-1" /> Weather Update
                   </h3>
+                  <span className="text-xs text-gray-400">
+                    Last updated: {weather.current.lastUpdated}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-2xl font-bold text-white">{weather.current.temp}°C</p>
-                    <p className="text-xs text-gray-300">{weather.current.condition}</p>
+                    <p className="text-xs text-gray-300 capitalize">{weather.current.condition}</p>
                   </div>
                   <CloudRain className="w-10 h-10 text-cyan-400" />
                 </div>

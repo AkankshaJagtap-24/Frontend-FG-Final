@@ -150,7 +150,7 @@ export default function ProfilePage() {
                   type="submit"
                   className="w-full mt-6 bg-cyan-600 hover:bg-cyan-700 text-white"
                   disabled={isLoading}
-                >
+                > 
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />

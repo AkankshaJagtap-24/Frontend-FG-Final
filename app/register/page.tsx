@@ -35,41 +35,47 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
+  // Add these new state variables with the existing ones
+  const [password, setPassword] = useState("")
+  const [city, setCity] = useState("")
+  const [state, setState] = useState("")
+  const [pincode, setPincode] = useState("")
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
 
-    // Validate form
-    if (!name || !mobile || !locationPermission || !smsPermission) {
-      setError("Please fill all required fields and accept the permissions")
+    // Updated validation
+    if (!name || !email || !password || !mobile || !city || !state || !pincode) {
+      setError("Please fill all required fields")
       return
     }
 
     setIsLoading(true)
 
     try {
-      // Request location permission if checked
-      if (locationPermission) {
-        const location = await getCurrentLocation()
-        if (location.error) {
-          console.log("Location permission error:", location.error)
-          // We'll continue anyway for demo purposes
-        }
-      }
+      const response = await fetch('http://localhost:5001/api/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          mobile,
+          city,
+          state,
+          pincode
+        })
+      });
 
-      // Register user
-      const success = await register({
-        name,
-        email,
-        mobile,
-        locationPermission,
-        smsPermission,
-      })
+      const data = await response.json();
 
-      if (success) {
+      if (data.success) {
         setShowSuccess(true)
       } else {
-        setError("Registration failed. Please try again.")
+        setError(data.message || "Registration failed. Please try again.")
       }
     } catch (err) {
       setError("An unexpected error occurred. Please try again.")
@@ -78,6 +84,8 @@ export default function RegisterPage() {
       setIsLoading(false)
     }
   }
+
+
 
   const handleSuccessClose = () => {
     setShowSuccess(false)
@@ -110,7 +118,135 @@ export default function RegisterPage() {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-4">
+              {/* // Add these new form fields in the form section */}
+               
+              {/*   <div className="space-y-2">
+                  <Label htmlFor="city" className="text-gray-200">
+                    City
+                  </Label>
+                  <Input
+                    id="city"
+                    type="text"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    required
+                    className="bg-gray-800 border-gray-700 focus:border-cyan-500 text-white"
+                  />
+                </div>
+
                 <div className="space-y-2">
+                  <Label htmlFor="state" className="text-gray-200">
+                    State
+                  </Label>
+                  <Input
+                    id="state"
+                    type="text"
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                    required
+                    className="bg-gray-800 border-gray-700 focus:border-cyan-500 text-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="pincode" className="text-gray-200">
+                    Pincode
+                  </Label>
+                  <Input
+                    id="pincode"
+                    type="text"
+                    value={pincode}
+                    onChange={(e) => setPincode(e.target.value)}
+                    required
+                    className="bg-gray-800 border-gray-700 focus:border-cyan-500 text-white"
+                  />
+                </div> */}
+
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-gray-200">
+                    Full Name
+                  </Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    className="bg-gray-800 border-gray-700 focus:border-cyan-500 text-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-gray-200">
+                    Email Address
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="bg-gray-800 border-gray-700 focus:border-cyan-500 text-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="mobile" className="text-gray-200">
+                    Mobile Number
+                  </Label>
+                  <Input
+                    id="mobile"
+                    type="tel"
+                    value={mobile}
+                    onChange={(e) => setMobile(e.target.value)}
+                    required
+                    className="bg-gray-800 border-gray-700 focus:border-cyan-500 text-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="city" className="text-gray-200">
+                    City
+                  </Label>
+                  <Input
+                    id="city"
+                    type="text"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    required
+                    className="bg-gray-800 border-gray-700 focus:border-cyan-500 text-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="state" className="text-gray-200">
+                    State
+                  </Label>
+                  <Input
+                    id="state"
+                    type="text"
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                    required
+                    className="bg-gray-800 border-gray-700 focus:border-cyan-500 text-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="pincode" className="text-gray-200">
+                    Pincode
+                  </Label>
+                  <Input
+                    id="pincode"
+                    type="text"
+                    value={pincode}
+                    onChange={(e) => setPincode(e.target.value)}
+                    required
+                    className="bg-gray-800 border-gray-700 focus:border-cyan-500 text-white"
+                  />
+                </div>
+
+                {/* <div className="space-y-2">
                   <Label htmlFor="name" className="text-gray-200">
                     Full Name
                   </Label>
@@ -146,6 +282,19 @@ export default function RegisterPage() {
                     type="tel"
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value)}
+                    required
+                    className="bg-gray-800 border-gray-700 focus:border-cyan-500 text-white"
+                  />
+                </div> */}
+                 <div className="space-y-2">
+                  <Label htmlFor="password" className="text-gray-200">
+                    Password
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     required
                     className="bg-gray-800 border-gray-700 focus:border-cyan-500 text-white"
                   />
