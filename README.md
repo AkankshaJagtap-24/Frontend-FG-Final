@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Flood Guard Android App
 
 A native Android application for real-time flood alerts and emergency information.
@@ -65,3 +66,6 @@ http://localhost:3000  Akanksha_project_flood-guard>
    - Network:      http://192.168.1.107:3000
 
    
+=======
+# Frontend-FG-Final
+>>>>>>> 370df92a886a32196126298dab35180b1afa5689
