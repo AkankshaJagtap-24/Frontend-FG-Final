@@ -13,36 +13,125 @@ import Link from "next/link"
 import { useUser } from "@/contexts/user-context"
 import { useRouter } from "next/navigation"
 import { AndroidLayout } from "@/components/android-layout"
+import { useEffect } from "react"
 
 export default function ProfilePage() {
   const router = useRouter()
   const { user, logout } = useUser()
-  const [name, setName] = useState(user?.name || "")
-  const [email, setEmail] = useState(user?.email || "")
-  const [mobile, setMobile] = useState(user?.mobile || "")
-  const [locationPermission, setLocationPermission] = useState(user?.locationPermission || false)
-  const [smsPermission, setSmsPermission] = useState(user?.smsPermission || false)
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [mobile, setMobile] = useState("")
+  const [city, setCity] = useState("")
+  const [state, setState] = useState("")
+  const [pincode, setPincode] = useState("")
+  const [locationPermission, setLocationPermission] = useState(false)
+  const [smsPermission, setSmsPermission] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState("")
 
-  if (!user) {
-    router.push("/home")
-    return null
-  }
+
+  const token = sessionStorage.getItem('token')
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch('http://localhost:5001/api/profile', {
+          headers: {
+            'Authorization': `Bearer `+token
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch profile');
+        }
+
+        const { success, profile } = await response.json();
+        if (success && profile) {
+          setName(profile.name || "");
+          setEmail(profile.email || "");
+          setMobile(profile.phone || "");
+          setCity(profile.city || "");
+          setState(profile.state || "");
+          setPincode(profile.pincode || "");
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        router.push("/home")
+        return null
+      }
+    };
+
+    if (token) {
+      fetchProfile();
+    }
+  }, [user]);
+
+  // if (!user) {
+  //   router.push("/home")
+  //   return null
+  // }
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setSuccess("")
 
-    try {
-      // In a real app, this would update the user profile in a backend
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+    // Validation
+    if (!name.trim() || !mobile.trim() || !city.trim() || !state.trim() || !pincode.trim()) {
+      setSuccess("All fields except email are required")
+      setIsLoading(false)
+      return
+    }
 
-      // Show success message
-      setSuccess("Profile updated successfully!")
+    if (pincode.length !== 6 || !/^\d+$/.test(pincode)) {
+      setSuccess("Pincode must be 6 digits")
+      setIsLoading(false)
+      return
+    }
+
+    if (!/^\d{10}$/.test(mobile.replace(/[^0-9]/g, ''))) {
+      setSuccess("Please enter a valid 10-digit mobile number")
+      setIsLoading(false)
+      return
+    }
+
+    try {
+      const response = await fetch('http://localhost:5001/api/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          name,
+          email: user?.email, // Keep existing email
+          city,
+          pincode,
+          state,
+          phone: mobile
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setSuccess(data.message);
+        // scroll to top
+        window.scrollTo(0, 0)
+        // Update session storage with new profile data
+        // const currentUser = JSON.parse(sessionStorage.getItem('user') || '{}');
+        // ('user', JSON.stringify({
+        //   ...currentUser,
+        //   ...data.profile
+        // }));
+        sessionStorage.setItem('userLocation',data.profile.city??"");
+        sessionStorage.setItem('userPincode',data.profile.pincode??"");
+        sessionStorage.setItem('userState',data.profile.state??"");
+      } else {
+        setSuccess(data.message || "Failed to update profile");
+      }
     } catch (err) {
       console.error("Failed to update profile:", err)
+      setSuccess("Failed to update profile. Please try again.")
     } finally {
       setIsLoading(false)
     }
@@ -95,7 +184,7 @@ export default function ProfilePage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-gray-200">
-                    Email Address (Optional)
+                    Email Address
                   </Label>
                   <Input
                     id="email"
@@ -115,6 +204,48 @@ export default function ProfilePage() {
                     type="tel"
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value)}
+                    required
+                    className="bg-gray-800 border-gray-700 focus:border-cyan-500 text-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="city" className="text-gray-200">
+                    City
+                  </Label>
+                  <Input
+                    id="city"
+                    type="text"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    required
+                    className="bg-gray-800 border-gray-700 focus:border-cyan-500 text-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="state" className="text-gray-200">
+                    State
+                  </Label>
+                  <Input
+                    id="state"
+                    type="text"
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                    required
+                    className="bg-gray-800 border-gray-700 focus:border-cyan-500 text-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="pincode" className="text-gray-200">
+                    Pincode
+                  </Label>
+                  <Input
+                    id="pincode"
+                    type="text"
+                    value={pincode}
+                    onChange={(e) => setPincode(e.target.value)}
                     required
                     className="bg-gray-800 border-gray-700 focus:border-cyan-500 text-white"
                   />

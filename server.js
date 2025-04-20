@@ -55,7 +55,7 @@ app.post('/api/add_forum_post', (req, res) => {
   res.json({ success: true, post: newPost });
 });
 
-const PORT = 5001;
+const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

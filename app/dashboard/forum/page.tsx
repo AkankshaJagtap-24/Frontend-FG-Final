@@ -21,6 +21,7 @@ export default function ForumPage() {
   const [newPostContent, setNewPostContent] = useState("")
   const [comment, setComment] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const token = sessionStorage.getItem('token')
 
   useEffect(() => {
     const loadPosts = async () => {
@@ -29,7 +30,8 @@ export default function ForumPage() {
         const response = await fetch('http://localhost:5001/api/forum', {
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer `+token
           }
         });
 
