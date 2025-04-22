@@ -98,14 +98,14 @@ export default function DashboardPage() {
       const sosData = {
         userId: user.id,
         location: userCity,
-        log: location.longitude || "",
-        lat: location.latitude || "",
+        longitude: location.longitude || "",
+        latitude: location.latitude || "",
         city: userCity,
-        description: "Emergency SOS alert"
+        description: "Emergency SOS alert by "+user.name,
       }
 
       // Send SOS request to the API
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/sos_hit`, {
+      const response = await fetch(`http://localhost:5001/api/sos_hit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
